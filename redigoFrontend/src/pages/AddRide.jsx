@@ -1,20 +1,20 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useParams } from "react-router-dom"; // ✅ missing import
 import {
   CalendarIcon,
   Car,
   MapPin,
   Clock,
   Users,
-  DollarSign,
   IndianRupee,
 } from "lucide-react";
 import Header from "../components/Navbar";
 import Footer from "../components/Footer";
 
-const GOOGLE_API_KEY =  import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-console.log("Using Google API Key:", GOOGLE_API_KEY);
+const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
 const PublishRide = () => {
+  const { rideId } = useParams(); // ✅ now works
   const [formData, setFormData] = useState({
     from: "",
     fromCoords: null,
@@ -37,7 +37,39 @@ const PublishRide = () => {
   const [message, setMessage] = useState("");
   const [suggestions, setSuggestions] = useState({ from: [], to: [] });
 
-  // 🔎 Fetch autocomplete predictions
+  useEffect(() => {
+    if (rideId) {
+      fetch(`http://localhost:5000/api/rides/${rideId}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success) {
+            const ride = data.ride;
+            console.log(ride);
+            
+            setFormData({
+              from: ride.ride.from || "",
+              to: ride.ride.to || "",
+              date: ride.ride.date ? ride.ride.date.split("T")[0] : "",
+              time: ride.ride.time || "",
+              availableSeats: ride.ride.availableSeats || "",
+              price: ride.ride.price || "",
+              distance: ride.ride.distance || "",
+              duration: ride.duration || "",
+              driverName: ride.ride.driver && ride.ride.driver.name ? ride.ride.driver.name : "",
+              phone: ride.ride.driver && ride.ride.driver.phone ? ride.ride.driver.phone : "",
+              email: ride.ride.driver && ride.ride.driver.email ? ride.ride.driver.email : "",
+              carModel: ride.ride.car && ride.ride.car.model ? ride.ride.car.model : "",
+              carColor: ride.ride.car && ride.ride.car.color ? ride.ride.car.color : "",
+              licensePlate: ride.ride.car && ride.ride.car.licensePlate ? ride.ride.car.licensePlate : "",
+              notes: ride.ride.notes || ""
+            });
+
+          }
+        })
+        .catch((err) => console.error("Error fetching ride:", err));
+    }
+  }, [rideId]);
+
   const fetchPredictions = async (input, type) => {
     if (!input) {
       setSuggestions((prev) => ({ ...prev, [type]: [] }));
@@ -64,14 +96,10 @@ const PublishRide = () => {
     }
   };
 
-  // 📍 Fetch place details after selecting
   const fetchPlaceDetails = async (placeId, type) => {
     try {
       const response = await fetch(
-        `https://places.googleapis.com/v1/places/${placeId}?key=${GOOGLE_API_KEY}&fields=location,formattedAddress`,
-        {
-          method: "GET",
-        }
+        `https://places.googleapis.com/v1/places/${placeId}?key=${GOOGLE_API_KEY}&fields=location,formattedAddress`
       );
       const data = await response.json();
       if (data) {
@@ -158,10 +186,16 @@ const PublishRide = () => {
         notes: formData.notes || undefined,
       };
 
-     const token = localStorage.getItem("token");
+      const token = localStorage.getItem("token");
 
-      const response = await fetch("http://localhost:5000/api/rides/addRide", {
-        method: "POST",
+      // ✅ Switch between Create & Update
+      const url = rideId
+        ? `http://localhost:5000/api/rides/${rideId}`
+        : "http://localhost:5000/api/rides/addRide";
+      const method = rideId ? "PUT" : "POST";
+
+      const response = await fetch(url, {
+        method,
         headers: {
           "Content-Type": "application/json",
           Authorization: `${token}`,
@@ -169,29 +203,34 @@ const PublishRide = () => {
         body: JSON.stringify(rideData),
       });
 
-
       const result = await response.json();
       if (result.success) {
-        setMessage("✅ Ride published successfully!");
-        setFormData({
-          from: "",
-          fromCoords: null,
-          to: "",
-          toCoords: null,
-          date: "",
-          time: "",
-          availableSeats: "",
-          price: "",
-          driverName: "",
-          phone: "",
-          email: "",
-          carModel: "",
-          carColor: "",
-          licensePlate: "",
-          notes: "",
-        });
+        setMessage(
+          rideId
+            ? "✅ Ride updated successfully!"
+            : "✅ Ride published successfully!"
+        );
+        if (!rideId) {
+          setFormData({
+            from: "",
+            fromCoords: null,
+            to: "",
+            toCoords: null,
+            date: "",
+            time: "",
+            availableSeats: "",
+            price: "",
+            driverName: "",
+            phone: "",
+            email: "",
+            carModel: "",
+            carColor: "",
+            licensePlate: "",
+            notes: "",
+          });
+        }
       } else {
-        setMessage(`❌ Error: ${result.message || "Failed to publish ride"}`);
+        setMessage(`❌ Error: ${result.message || "Failed to save ride"}`);
       }
     } catch (error) {
       console.error("Error publishing ride:", error);
@@ -200,7 +239,6 @@ const PublishRide = () => {
       setLoading(false);
     }
   };
-
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
@@ -208,10 +246,12 @@ const PublishRide = () => {
         <div className="max-w-2xl mx-auto bg-white shadow-md rounded-2xl p-8">
           <h2 className="text-3xl font-bold mb-6 flex items-center gap-2 justify-center">
             <Car className="h-6 w-6 text-blue-600" />
-            <span className="text-cyan-900">Publish Your Ride</span>
+            <span className="text-cyan-900">
+              {rideId ? "Edit Your Ride" : "Publish Your Ride"}
+            </span>
           </h2>
 
-          {message && (
+           {message && (
             <div
               className={`mb-6 p-4 rounded-lg text-center ${
                 message.includes("✅")
@@ -227,7 +267,7 @@ const PublishRide = () => {
             {/* From & To with Autocomplete */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="relative">
-                <label className="block text-sm font-medium text-gray-700 flex items-center gap-2">
+                <label className=" text-sm font-medium text-gray-700 flex items-center gap-2">
                   <MapPin className="h-4 w-4 text-blue-600" /> From *
                 </label>
                 <input
@@ -255,7 +295,7 @@ const PublishRide = () => {
               </div>
 
               <div className="relative">
-                <label className="block text-sm font-medium text-gray-700 flex items-center gap-2">
+                <label className=" text-sm font-medium text-gray-700 flex items-center gap-2">
                   <MapPin className="h-4 w-4 text-blue-600" /> To *
                 </label>
                 <input
@@ -468,7 +508,13 @@ const PublishRide = () => {
                 disabled={loading}
                 className="w-full bg-cyan-800 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loading ? "Publishing Ride..." : "Publish Ride"}
+                {loading
+                  ? rideId
+                    ? "Updating Ride..."
+                    : "Publishing Ride..."
+                  : rideId
+                  ? "Update Ride"
+                  : "Publish Ride"}
               </button>
             </div>
           </form>

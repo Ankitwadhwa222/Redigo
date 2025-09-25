@@ -7,7 +7,11 @@ const rideSchema = new mongoose.Schema({
   time: { type: String, required: true },
   availableSeats: { type: Number, required: true },
   price: { type: Number, required: true },
+  distance: { type: String },
+  duration: { type: String },
   driver: {
+    userId : { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  
     name: { type: String, required: true },
     rating: { type: Number, default: 5 },
     phone: { type: String, required: true },
@@ -19,6 +23,11 @@ const rideSchema = new mongoose.Schema({
     licensePlate: { type: String },
   },
   notes: { type: String },
+  status: {
+    type: String,
+    enum: ["active", "completed", "cancelled"],
+    default: "active"
+  }
 }, {
   timestamps: true
 });

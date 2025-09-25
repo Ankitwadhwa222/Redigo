@@ -39,6 +39,12 @@ const Header = () => {
         {/* Navbar */}
         <nav className="hidden md:flex items-center space-x-8">
           <a
+            href="/"
+            className="text-sm font-medium text-gray-700 hover:text-cyan-800 transition-colors"
+          >
+            Home
+          </a>
+          <a
             href="/search-rides"
             className="text-sm font-medium text-gray-700 hover:text-cyan-800 transition-colors"
           >
@@ -102,10 +108,16 @@ const Header = () => {
                   Sign Up
                   <ArrowRightCircle className="w-4 text-gray-700"></ArrowRightCircle>
                 </button>
+                
               </div>
             )}
             {showOptions && isLogouted && (
               <div className="absolute right-0 mt-5 w-60 bg-white border border-gray-200 rounded-lg shadow-lg py-2 font-Inter z-50">
+                <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center justify-between" onClick={() => navigate('/user/dashboard')}>
+                  Your Rides
+                  <ArrowRightCircle className="w-4 text-gray-700"></ArrowRightCircle>
+                </button>
+
                 <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center justify-between" onClick={() => {
                   setTimeout(() => {window.location.reload();}, 2000);
                   localStorage.removeItem("token");
@@ -115,6 +127,7 @@ const Header = () => {
                   Logout
                   <ArrowRightCircle className="w-4 text-gray-700"></ArrowRightCircle>
                 </button>
+                
               </div>
             )}
           </div>
