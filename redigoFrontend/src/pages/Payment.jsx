@@ -68,8 +68,8 @@ const PaymentPage = () => {
       try {
         setLoading(true);
         console.log("Fetching ride details for ID:", rideId);
-        
-        const response = await axios.get(`http://localhost:5000/api/rides/${rideId}`, {
+
+        const response = await axios.get(`${import.meta.env.BACKEND_URL}/api/rides/${rideId}`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`
           }
@@ -146,7 +146,7 @@ const handleRazorpayPayment = async () => {
     console.log("📤 Making payment request...");
 
     // 1️⃣ Create Razorpay Order
-    const { data } = await axios.post("http://localhost:5000/api/payments/create-order", requestData, {
+    const { data } = await axios.post(`${import.meta.env.BACKEND_URL}/api/payments/create-order`, requestData, {
       headers: {
         "Content-Type": "application/json"
       }
@@ -198,7 +198,7 @@ const handleRazorpayPayment = async () => {
           
           // Verify payment
           const verifyRes = await axios.post(
-            "http://localhost:5000/api/payments/verify-payment", 
+            `${import.meta.env.BACKEND_URL}/api/payments/verify-payment`, 
             {
               ...response,
               rideId,

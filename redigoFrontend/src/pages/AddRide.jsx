@@ -39,7 +39,7 @@ const PublishRide = () => {
 
   useEffect(() => {
     if (rideId) {
-      fetch(`http://localhost:5000/api/rides/${rideId}`)
+      fetch(`${import.meta.env.BACKEND_URL}/api/rides/${rideId}`)
         .then((res) => res.json())
         .then((data) => {
           if (data.success) {
@@ -189,8 +189,8 @@ const PublishRide = () => {
       const token = localStorage.getItem("token");
  
       const url = rideId
-        ? `http://localhost:5000/api/rides/${rideId}`
-        : "http://localhost:5000/api/rides/addRide";
+        ? `${import.meta.env.BACKEND_URL}/api/rides/${rideId}`
+        : `${import.meta.env.BACKEND_URL}/api/rides/addRide`;
       const method = rideId ? "PUT" : "POST";
 
       const response = await fetch(url, {

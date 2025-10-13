@@ -22,7 +22,7 @@ function DashboardPage() {
           return;
         }
 
-        const res = await axios.get("http://localhost:5000/api/user/profile", {
+        const res = await axios.get(`${import.meta.env.BACKEND_URL}/api/user/profile`, {
           headers: {
             Authorization: `${token}`,
           },
@@ -49,7 +49,7 @@ function DashboardPage() {
 
     setLoading(true);
     try {
-      await axios.delete(`http://localhost:5000/api/user/rides/${rideId}`, {
+      await axios.delete(`${import.meta.env.BACKEND_URL}/api/user/rides/${rideId}`, {
         headers: {
           Authorization: `${localStorage.getItem("token")}`,
         },
