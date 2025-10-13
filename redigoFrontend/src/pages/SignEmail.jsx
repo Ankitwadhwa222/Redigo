@@ -109,12 +109,11 @@ const handleOtpSubmit = async (e) => {
       <Navbar />
       <div className="min-h-screen bg-gradient-to-br from-white to-blue-50 flex items-start justify-center px-4">
         <div className="max-w-xl w-full mt-20">
-          {/* Heading */}
+          
           <h1 className="text-3xl md:text-4xl font-bold text-center text-cyan-900 mb-8">
             {step === 1 ? "What's your email?" : "Enter OTP"}
           </h1>
-
-          {/* Message */}
+ 
           {message && (
             <div
               className={`mb-6 p-3 rounded-lg text-center ${
@@ -126,11 +125,10 @@ const handleOtpSubmit = async (e) => {
               {message}
             </div>
           )}
-
-          {/* Step 1: Email + Password */}
+ 
           {step === 1 && (
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Email */}
+             
               <input
                 type="email"
                 name="email"
@@ -141,7 +139,7 @@ const handleOtpSubmit = async (e) => {
                 className="w-full px-4 py-3 rounded-xl border-2 border-cyan-700 focus:ring-2 focus:ring-cyan-700 focus:outline-none bg-gray-100 text-gray-800 text-lg"
               />
 
-              {/* Password */}
+           
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
@@ -161,7 +159,7 @@ const handleOtpSubmit = async (e) => {
                 </button>
               </div>
 
-              {/* Checkbox */}
+          
               <label className="flex items-center gap-2 cursor-pointer text-gray-700">
                 <input
                   type="checkbox"
@@ -175,7 +173,7 @@ const handleOtpSubmit = async (e) => {
                 </span>
               </label>
 
-              {/* Disclaimer */}
+      
               <p className="text-gray-600 text-sm leading-relaxed">
                 By entering your email, you agree to receive promotional emails
                 from <span className="font-semibold text-cyan-800">Redigo</span>.
@@ -192,8 +190,7 @@ const handleOtpSubmit = async (e) => {
               </button>
             </form>
           )}
-
-          {/* Step 2: OTP Verification */}
+ 
           {step === 2 && (
             <form onSubmit={handleOtpSubmit} className="space-y-6">
               <input

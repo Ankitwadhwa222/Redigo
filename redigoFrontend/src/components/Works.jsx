@@ -47,7 +47,7 @@ const Works = () => {
           </p>
         </div>
 
-        {/* Steps Grid */}
+        
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {steps.map((step, index) => (
             <motion.div
@@ -59,14 +59,14 @@ const Works = () => {
               transition={{ duration: 0.5, delay: index * 0.2 }}
               whileHover={{ scale: 1.05 }}
             >
-              {/* Connecting Line */}
+              
               {index < steps.length - 1 && (
                 <div className="hidden lg:block absolute top-20 left-full w-full h-0.5 bg-gray-200 z-0" />
               )}
 
-              {/* Card */}
+        
               <div className="relative z-10 text-center border border-gray-200 rounded-xl bg-white shadow-sm hover:shadow-lg hover:border-blue-300 transition-all duration-300 p-8">
-                {/* Icon with Step Number */}
+              
                 <div className="relative">
                   <div className="w-16 h-16 bg-gradient-to-br from-cyan-500 to-cyan-800 rounded-full flex items-center justify-center text-white mx-auto mb-4 shadow-md">
                     {step.icon}
@@ -75,13 +75,11 @@ const Works = () => {
                     {step.step}
                   </div>
                 </div>
-
-                {/* Title */}
+ 
                 <h3 className="text-xl font-semibold text-gray-900">
                   {step.title}
                 </h3>
-
-                {/* Description */}
+ 
                 <p className="text-gray-600 mt-2">{step.description}</p>
               </div>
             </motion.div>

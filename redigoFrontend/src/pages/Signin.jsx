@@ -30,7 +30,7 @@ const Signin = () => {
           </p>
         </div>
 
-        {/* Buttons */}
+    
         <div className="space-y-4">
  <div
   onClick={handleEmailContinue}
@@ -42,7 +42,7 @@ const Signin = () => {
   </div>
   <ArrowRight className="h-5 w-5" />
 </div>
-  {/* Continue with Facebook */}
+ 
  <div
   onClick={handleFacebookContinue}
   className="w-full border-b-2 border-white-600 bg-cyan-800 text-white py-2 px-6 rounded-lg  hover:bg-cyan-700 transition-colors cursor-pointer flex items-center justify-between"
@@ -55,7 +55,7 @@ const Signin = () => {
 </div>
 </div>
 
-        {/* Footer */}
+       
         <div className="text-center mt-8">
           <p className="text-sm text-gray-500">
             By continuing, you agree to our{" "}

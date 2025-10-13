@@ -54,7 +54,7 @@ const Signup = () => {
       <Navbar />
       <div className="min-h-screen bg-gradient-to-br from-white to-blue-50 flex items-start justify-center px-4">
         <div className="max-w-xl w-full mt-16">
-          {/* Heading */}
+      
           <h1 className="text-3xl md:text-4xl font-bold text-center text-cyan-900 mb-6">
             Create your account
           </h1>
@@ -62,7 +62,7 @@ const Signup = () => {
             Join <span className="font-semibold text-cyan-700">Redigo</span> and start sharing rides today.
           </p>
 
-          {/* Form */}
+ 
           {message && (
               <div
                 className={`mb-4 p-3 rounded-lg text-center ${
@@ -76,7 +76,7 @@ const Signup = () => {
             )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Name */}
+        
             <input
               type="text"
               name="name"
@@ -87,7 +87,7 @@ const Signup = () => {
               className="w-full px-4 py-3 rounded-xl border-2 border-cyan-600 focus:ring-2 focus:ring-cyan-800 focus:outline-none bg-gray-100 text-gray-800 text-lg"
             />
 
-            {/* Email */}
+           
             <input
               type="email"
               name="email"
@@ -98,7 +98,7 @@ const Signup = () => {
               className="w-full px-4 py-3 rounded-xl border-2 border-cyan-600 focus:ring-2 focus:ring-cyan-800 focus:outline-none bg-gray-100 text-gray-800 text-lg"
             />
 
-            {/* Password */}
+          
             <input
               type="password"
               name="password"
@@ -109,7 +109,7 @@ const Signup = () => {
               className="w-full px-4 py-3 rounded-xl border-2 border-cyan-600 focus:ring-2 focus:ring-cyan-800 focus:outline-none bg-gray-100 text-gray-800 text-lg"
             />
 
-            {/* Checkbox */}
+       
             <label className="flex items-start gap-2 cursor-pointer text-gray-700">
               <input
                 type="checkbox"
@@ -124,8 +124,7 @@ const Signup = () => {
                 I can opt out anytime in my profile settings.
               </span>
             </label>
-
-            {/* Signup Button */}
+ 
             <button
               type="submit"
               className="w-full bg-cyan-800 text-white py-3 rounded-xl font-semibold hover:bg-cyan-700 transition-colors"
@@ -134,7 +133,7 @@ const Signup = () => {
             </button>
           </form>
 
-          {/* Extra Content */}
+        
           <p className="text-center text-gray-600 text-sm mt-6">
             Already have an account?{" "}
             <a href="/signin/email" className="text-cyan-700 font-medium hover:underline">

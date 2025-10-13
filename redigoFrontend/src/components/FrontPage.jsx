@@ -11,8 +11,7 @@ const FrontPage = () => {
   const navigate = useNavigate();
 
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-
-  // Fetch autocomplete suggestions from new Places API
+ 
   const fetchPlaces = async (value, setter) => {
     if (!value) {
       setter([]);
@@ -54,21 +53,21 @@ const FrontPage = () => {
   };
 
   const handleFindRides = () => {
-    // Validate form data
+ 
     if (!from || !to) {
       alert("Please fill in both From and To locations");
       return;
     }
 
-    // Create search parameters
+     
     const searchParams = new URLSearchParams({
       from: from,
       to: to,
-      ...(date && { date: date }), // Only add date if it's provided
-      passengers: "1" // Default to 1 passenger
+      ...(date && { date: date }),  
+      passengers: "1"  
     });
 
-    // Navigate to SearchRides page with pre-filled data
+   
     navigate(`/search-rides?${searchParams.toString()}`);
   };
 
@@ -91,7 +90,7 @@ const FrontPage = () => {
               </p>
             </div>
 
-            {/* Search Form */}
+           
             <div className="bg-white rounded-2xl p-6 shadow-lg border">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {/* From Input */}
@@ -130,7 +129,7 @@ const FrontPage = () => {
                   )}
                 </div>
 
-                {/* To Input */}
+              
                 <div className="relative">
                   <MapPin className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                   <input
@@ -166,7 +165,7 @@ const FrontPage = () => {
                   )}
                 </div>
 
-                {/* Date Input */}
+                
                 <div className="relative">
                   <Calendar className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                   <input
@@ -178,7 +177,7 @@ const FrontPage = () => {
                 </div>
               </div>
 
-              {/* Search Button */}
+             
               <button className="w-full mt-4 h-12 bg-gradient-to-r from-cyan-700 via-cyan-800 to-cyan-700 text-white rounded-lg font-semibold flex items-center justify-center gap-2 hover:opacity-90 transition" 
               onClick={handleFindRides}>
                 <Search className="h-5 w-5" />
@@ -186,7 +185,7 @@ const FrontPage = () => {
               </button>
             </div>
 
-            {/* Stats */}
+          
             <div className="flex items-center space-x-8 text-sm text-gray-600">
               <div className="text-center">
                 <div className="text-2xl font-bold text-gray-900">50k+</div>
@@ -203,11 +202,11 @@ const FrontPage = () => {
             </div>
           </div>
 
-          {/* Right Section - Hero Image */}
+          
           <div className="relative">
             <div className="absolute inset-0 rounded-3xl blur-3xl"></div>
             <img
-              src="public/1f428ed25b47ee592594642f90984df0-removebg-preview.png"
+              src="public/Screenshot_2025-10-07_104340-removebg-preview.png"
               alt="People carpooling together in a modern, safe environment"
               className="relative rounded-2xl ml-5 w-full h-auto"
             />

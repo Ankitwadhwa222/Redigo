@@ -57,10 +57,10 @@ function DashboardPage() {
       setUserInfo((prev) => ({
       ...prev,
       rides: prev.rides.filter((ride) => ride._id !== rideId),
-      totalRides: prev.totalRides - 1 // ✅ Also update total count
+      totalRides: prev.totalRides - 1  
     }));
 
-    // ✅ Show success message
+  
     alert("Ride deleted successfully!");
     } catch (err) {
       console.error(err);
@@ -101,9 +101,9 @@ function DashboardPage() {
         </p>
       </div>
 
-      {/* Stats Section */}
+     
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        {/* Rides Offered */}
+    
         <div className="bg-white p-4 rounded-lg shadow border border-gray-200">
           <div className="flex justify-between items-center">
             <div className="text-sm font-medium">Rides Offered</div>
@@ -115,7 +115,7 @@ function DashboardPage() {
           <div className="text-sm text-gray-500">Total rides you've posted</div>
         </div>
 
-        {/* Rides Booked */}
+       
         <div className="bg-white p-4 rounded-lg shadow border border-gray-200">
           <div className="flex justify-between items-center">
             <div className="text-sm font-medium">Rides Booked</div>
@@ -127,7 +127,7 @@ function DashboardPage() {
           <div className="text-sm text-gray-500">Trips you've joined</div>
         </div>
 
-        {/* Earnings */}
+   
         <div className="bg-white p-4 rounded-lg shadow border border-gray-200">
           <div className="flex justify-between items-center">
             <div className="text-sm font-medium">Earnings</div>
@@ -141,7 +141,7 @@ function DashboardPage() {
           <div className="text-sm text-gray-500">Money earned from rides</div>
         </div>
 
-        {/* Savings */}
+     
         <div className="bg-white p-4 rounded-lg shadow border border-gray-200">
           <div className="flex justify-between items-center">
             <div className="text-sm font-medium">Savings</div>
@@ -156,9 +156,9 @@ function DashboardPage() {
         </div>
       </div>
 
-      {/* Rides & Bookings */}
+    
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Rides Section */}
+         
         <div className="bg-white p-6 rounded-lg shadow border border-gray-200">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-lg font-semibold">
@@ -197,7 +197,7 @@ function DashboardPage() {
 
         </div>
 
-        {/* Bookings Section */}
+       
         <div className="bg-white p-6 rounded-lg shadow border border-gray-200">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-lg font-semibold">

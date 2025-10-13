@@ -187,8 +187,7 @@ const PublishRide = () => {
       };
 
       const token = localStorage.getItem("token");
-
-      // ✅ Switch between Create & Update
+ 
       const url = rideId
         ? `http://localhost:5000/api/rides/${rideId}`
         : "http://localhost:5000/api/rides/addRide";
@@ -207,8 +206,8 @@ const PublishRide = () => {
       if (result.success) {
         setMessage(
           rideId
-            ? "✅ Ride updated successfully!"
-            : "✅ Ride published successfully!"
+            ? " Ride updated successfully!"
+            : " Ride published successfully!"
         );
         if (!rideId) {
           setFormData({
@@ -353,8 +352,7 @@ const PublishRide = () => {
                 />
               </div>
             </div>
-
-            {/* Seats & Price */}
+ 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 flex items-center gap-2">
@@ -392,8 +390,7 @@ const PublishRide = () => {
                 />
               </div>
             </div>
-
-            {/* Driver Information */}
+ 
             <div>
               <h3 className="text-lg font-semibold mb-2">Driver Information</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -441,7 +438,7 @@ const PublishRide = () => {
               </div>
             </div>
 
-            {/* Car Details */}
+            
             <div>
               <h3 className="text-lg font-semibold mb-2">Car Information (Optional)</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -486,8 +483,7 @@ const PublishRide = () => {
                 />
               </div>
             </div>
-
-            {/* Notes */}
+ 
             <div>
               <label className="block text-sm font-medium text-gray-700">
                 Additional Notes (Optional)
@@ -500,8 +496,7 @@ const PublishRide = () => {
                 className="mt-1 w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 min-h-[100px]"
               ></textarea>
             </div>
-
-            {/* Submit Button */}
+ 
             <div>
               <button
                 type="submit"
