@@ -8,7 +8,7 @@ const addRide = async (rideData, user) => {
     const rideWithUser = {
       ...rideData,
       driver: {
-        userId: user._id, // ✅ matches schema
+        userId: user._id,  
         name: user.name,
         phone: user.phone || rideData.driver?.phone || "",
         email: user.email || rideData.driver?.email || "",
@@ -19,7 +19,7 @@ const addRide = async (rideData, user) => {
     const newRide = new Ride(rideWithUser);
     await newRide.save();
 
-    // ✅ push ride into user's rides array
+    
     await User.findByIdAndUpdate(
       user._id,
       { $push: { rides: newRide._id } },
@@ -71,7 +71,7 @@ const searchRides = async (queryParams) => {
   }
 };
 
-// Get ride by ID (for booking/details)
+ 
 const getRideById = async (rideId) => {
   try {
     const ride = await Ride.findById(rideId)
@@ -98,9 +98,7 @@ const getRideById = async (rideId) => {
 
 const editRide = async (rideId, userId, updateData) => {
   try {
-    console.log("🔧 EditRide called:", { rideId, userId, updateData });
     
-    // ✅ First, get the existing ride to preserve driver info
     const existingRide = await Ride.findOne({ 
       _id: rideId, 
       'driver.userId': userId 
@@ -113,21 +111,20 @@ const editRide = async (rideId, userId, updateData) => {
       };
     }
 
-    // ✅ Prepare update data while preserving driver.userId
+  
     const safeUpdateData = { ...updateData };
     
-    // ✅ If driver info is being updated, preserve the userId
+ 
     if (updateData.driver) {
       safeUpdateData.driver = {
-        ...existingRide.driver.toObject(), // Preserve existing driver data
-        ...updateData.driver,              // Apply updates
-        userId: existingRide.driver.userId // Ensure userId is preserved
+        ...existingRide.driver.toObject(),
+        ...updateData.driver,              
+        userId: existingRide.driver.userId 
       };
     }
 
-    console.log("🔄 Safe update data:", safeUpdateData);
-
-    // Find and update the ride
+   
+ 
     const ride = await Ride.findOneAndUpdate(
       { 
         _id: rideId, 
@@ -137,7 +134,7 @@ const editRide = async (rideId, userId, updateData) => {
       { new: true, runValidators: true }
     );
 
-    console.log("✅ Ride updated successfully:", ride);
+    console.log(" Ride updated successfully:", ride);
 
     return {
       success: true,
@@ -145,7 +142,7 @@ const editRide = async (rideId, userId, updateData) => {
       ride
     };
   } catch (err) {
-    console.error("❌ EditRide error:", err);
+    console.error("EditRide error:", err);
     return {
       success: false,
       message: err.message

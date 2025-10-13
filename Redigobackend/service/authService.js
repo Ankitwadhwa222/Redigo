@@ -17,7 +17,7 @@ const registerUser = async ({name, email, password}) => {
      const existingUser = await UserModel.findOne({email});
      if(existingUser) throw new Error("User already exists with this email");
 
-     // Hash password
+      
      const salt = await bcrypt.genSalt(10);
      const hashedPassword = await bcrypt.hash(password, salt);
 

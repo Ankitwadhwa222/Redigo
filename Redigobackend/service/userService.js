@@ -1,11 +1,12 @@
 const User = require("../models/User");
 const Ride = require("../models/Ride");
 
-// Get user's published rides
+
+
 const getUserRides = async (userId) => {
   try {
     const rides = await Ride.find({ 'driver.userId': userId })
-                           .sort({ date: -1 }); // Most recent first
+                           .sort({ date: -1 }); 
 
     return {
       success: true,
@@ -19,7 +20,7 @@ const getUserRides = async (userId) => {
   }
 };
 
-// Get user profile with rides count
+ 
 const getUserProfile = async (userId) => {
   try {
     const user = await User.findById(userId).populate('rides');

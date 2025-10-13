@@ -1,6 +1,6 @@
 const authService = require("../service/authService");
 
-// Controller for user registration
+ 
 const signup = async (req, res) => {
   try {
     const { name, email, password,  } = req.body;

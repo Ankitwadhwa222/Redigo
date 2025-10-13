@@ -10,23 +10,23 @@ const transporter = nodemailer.createTransport({
 
 function sendMail(to, subject, otp) {
     const mailOptions = {
-        from: `"Redigo" <${process.env.EMAIL}>`,  // ✅ Changed from SkillChain to Redigo
+        from: `"Redigo" <${process.env.EMAIL}>`,  
         to: to,
-        subject: subject || "Your OTP Code for Redigo",  // ✅ Changed to Redigo
+        subject: subject || "Your OTP Code for Redigo",  
         text: `Hello User,
 
-Thank you for using Redigo!  
+        Thank you for using Redigo!  
 
-Your One-Time Password (OTP) is: ${otp}
+        Your One-Time Password (OTP) is: ${otp}
 
-Please enter this code to verify your email address. This OTP is valid for 5 minutes.
+        Please enter this code to verify your email address. This OTP is valid for 5 minutes.
 
-If you did not request this code, please ignore this email.
+        If you did not request this code, please ignore this email.
 
-Best regards,
-The Redigo Team  
-🚗 Share your ride, share the journey!
-`
+        Best regards,
+        The Redigo Team  
+        🚗 Share your ride, share the journey!
+        `
     };
     
     transporter.sendMail(mailOptions, (error, info) => {
