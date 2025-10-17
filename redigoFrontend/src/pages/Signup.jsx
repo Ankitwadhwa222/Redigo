@@ -28,7 +28,7 @@ const Signup = () => {
     console.log("Signup Data:", formData);
     
     try {
-      const response = await fetch(`${import.meta.env.BACKEND_URL}/auth/signup`, {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/auth/signup`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

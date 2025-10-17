@@ -32,7 +32,7 @@ const SignEmail = () => {
 
     try {
       const response = await axios.post(
-        `${import.meta.env.BACKEND_URL}/auth/signin/email`,
+        `${import.meta.env.VITE_BACKEND_URL}/auth/signin/email`,
         formData
       );
 
@@ -40,7 +40,7 @@ const SignEmail = () => {
 
       if (response.data.user || response.data.user.token) {
         // send OTP
-        await axios.post(`${import.meta.env.BACKEND_URL}/auth/send-otp`, {
+        await axios.post(`${import.meta.env.VITE_BACKEND_URL}/auth/send-otp`, {
           email: formData.email
         });
 
@@ -68,7 +68,7 @@ const handleOtpSubmit = async (e) => {
 
   try {
     const response = await axios.post(
-      `${import.meta.env.BACKEND_URL}/auth/verify-otp`,
+      `${import.meta.env.VITE_BACKEND_URL}/auth/verify-otp`,
       {
         email: formData.email,
         otp

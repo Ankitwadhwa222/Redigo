@@ -52,7 +52,7 @@ const SearchRides = () => {
     
     try {
       const query = new URLSearchParams(searchData).toString();
-      const apiUrl = `${import.meta.env.BACKEND_URL}/api/rides/search?${query}`;
+      const apiUrl = `${import.meta.env.VITE_BACKEND_URL}/api/rides/search?${query}`;
       
       const res = await fetch(apiUrl);
       const data = await res.json();

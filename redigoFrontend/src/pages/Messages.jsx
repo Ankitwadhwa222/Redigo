@@ -30,7 +30,7 @@ const Messages = () => {
 
   const fetchCurrentUser = async (token) => {
     try {
-      const response = await fetch(`${import.meta.env.BACKEND_URL}/api/user/profile`, {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/user/profile`, {
         headers: {
           Authorization: `${token}`,
         },
@@ -49,7 +49,7 @@ const Messages = () => {
   const fetchConversations = async (token, userId) => {
     try {
       setLoading(true);
-      const response = await fetch(`${import.meta.env.BACKEND_URL}/api/chat/conversations/${userId}`, {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/chat/conversations/${userId}`, {
         headers: {
           Authorization: token,
         },

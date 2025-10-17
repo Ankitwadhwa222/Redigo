@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import Header from "../components/Navbar";
 
-const socket = io(`${import.meta.env.BACKEND_URL}`, {
+const socket = io(`${import.meta.env.VITE_BACKEND_URL}`, {
   transports: ["websocket", "polling"],
   withCredentials: true,
 });
@@ -44,7 +44,7 @@ const RideChat = () => {
 
   const fetchCurrentUser = async (token) => {
     try {
-      const response = await fetch(`${import.meta.env.BACKEND_URL}/api/user/profile`, {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/user/profile`, {
         headers: { Authorization: token },
       });
       const data = await response.json();
@@ -69,7 +69,7 @@ const RideChat = () => {
     setLoading(true);
     const token = localStorage.getItem("token");
 
-    const rideResponse = await fetch(`${import.meta.env.BACKEND_URL}/api/rides/${rideId}`, {
+    const rideResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/rides/${rideId}`, {
       headers: { Authorization: token },
     });
     const rideData = await rideResponse.json();
@@ -134,7 +134,7 @@ const RideChat = () => {
       const token = localStorage.getItem("token");
       
       // Try to get passenger from chat history first
-      const chatResponse = await fetch(`${import.meta.env.BACKEND_URL}/api/chat/passenger/${rideId}`, {
+      const chatResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/chat/passenger/${rideId}`, {
         headers: { Authorization: token },
       });
       
@@ -247,7 +247,7 @@ const fetchChatHistory = async () => {
 
     // ✅ FIX: Use currentUser._id directly for the API call
     const res = await fetch(
-      `${import.meta.env.BACKEND_URL}/api/chat/${rideId}/${currentUser._id}`,
+      `${import.meta.env.VITE_BACKEND_URL}/api/chat/${rideId}/${currentUser._id}`,
       { headers: { Authorization: token } }
     );
     const data = await res.json();
