@@ -5,7 +5,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import io from "socket.io-client";
 
-const socket = io("http://localhost:5000", {
+const socket = io(`${import.meta.env.VITE_BACKEND_URL}`, {
   transports: ["websocket", "polling"],
   withCredentials: true,
 });
@@ -74,7 +74,7 @@ const LiveMap = () => {
           console.log("📍 Fetching ride details for:", rideId);
           
           try {
-            const response = await axios.get(`http://localhost:5000/api/rides/${rideId}`, {
+            const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/rides/${rideId}`, {
               headers: {
                 Authorization: `Bearer ${token}`
               }
