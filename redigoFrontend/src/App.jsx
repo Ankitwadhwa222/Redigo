@@ -14,6 +14,9 @@ import Messages from './pages/Messages'
  
 import LiveMap from './pages/LiveMap'
 import PaymentPage from './pages/Payment'
+import BookedRides from './pages/Bookedride'
+import Safety from './pages/Safety'
+import AccountSettings from './pages/Settings'
 
 function App() {
   
@@ -21,6 +24,7 @@ function App() {
   return (
     <>
      <BrowserRouter>
+     <main className='pt-20'>
       <Routes>
  
         <Route path="/" element={<Dashboard />} />
@@ -33,7 +37,7 @@ function App() {
         <Route path="/signin" element={<Signin />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/signin/email" element={<SignEmail />} />
-        <Route path="/user/dashboard" element={
+        <Route path="/dashboard" element={
           <ProtectedRoutes>
             <DashboardPage />
           </ProtectedRoutes>
@@ -59,8 +63,26 @@ function App() {
         </ProtectedRoutes>
       } />
 
+      <Route path = "/my-rides" element={
+          <ProtectedRoutes>
+            <BookedRides />
+          </ProtectedRoutes>
+        } />
+
+        <Route path = "/safety" element={
+          <ProtectedRoutes>
+            <Safety />
+          </ProtectedRoutes>
+        } />
+      <Route path = '/settings' element = {
+        <ProtectedRoutes>
+          <AccountSettings />
+        </ProtectedRoutes>
+      } />
       </Routes>
-      
+
+
+      </main>
      </BrowserRouter>
     </>
   )
