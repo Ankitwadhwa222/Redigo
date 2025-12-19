@@ -23,9 +23,11 @@ import {
   Award
 } from 'lucide-react';
 import Header from '../components/Navbar';
+import { useSimpleAlert } from '../components/SimpleAlert';
 
 const AccountSettings = () => {
   const navigate = useNavigate();
+  const { showSuccess, showError, showWarning, AlertComponent } = useSimpleAlert();
   const [loading, setLoading] = useState(false);
   const [saveLoading, setSaveLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('profile');
@@ -102,16 +104,22 @@ const AccountSettings = () => {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/users/profile', {
+      const response = await fetch('/api/user/profile', {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          'Authorization': `${token}`,
           'Content-Type': 'application/json'
         }
       });
 
       if (response.ok) {
         const data = await response.json();
-        setUserData(data.user);
+        console.log('Fetched user data:', data.user);
+        setUserData(prevData => ({
+          ...prevData,
+          ...data.user,
+          // Ensure dateOfBirth is formatted properly for date input
+          dateOfBirth: data.user.dateOfBirth ? data.user.dateOfBirth.split('T')[0] : ''
+        }));
         
      }
 } catch (error) {
@@ -125,9 +133,9 @@ const AccountSettings = () => {
   const fetchVehicles = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/users/vehicles', {
+      const response = await fetch('/api/user/vehicles', {
         headers: {
-          'Authorization': `Bearer ${token}`
+          'Authorization': `${token}`
         }
       });
 
@@ -146,45 +154,63 @@ const AccountSettings = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/users/profile', {
+      
+      // Filter out system-calculated fields that shouldn't be updated by user
+      const profileUpdateData = {
+        name: userData.name,
+        email: userData.email,
+        phone: userData.phone,
+        dateOfBirth: userData.dateOfBirth,
+        gender: userData.gender,
+        address: userData.address,
+        city: userData.city,
+        state: userData.state,
+        pincode: userData.pincode,
+        bio: userData.bio
+      };
+      
+      console.log('Sending profile update data:', profileUpdateData);
+      const response = await fetch('/api/user/profile', {
         method: 'PUT',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          'Authorization': `${token}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(userData)
+        body: JSON.stringify(profileUpdateData)
       });
 
       if (response.ok) {
-        alert('Profile updated successfully!');
+        showSuccess('Profile Updated!', 'Your profile has been updated successfully');
         
       } else {
-        alert('Failed to update profile');
+        const errorData = await response.json();
+        console.log('Error response:', errorData);
+        showError('Update Failed', errorData.message || 'Failed to update profile. Please try again.');
       }
     } catch (error) {
       console.error('Error updating profile:', error);
-      alert('Error updating profile');
+      showError('Network Error', 'Unable to update profile. Please check your connection.');
     } finally {
       setSaveLoading(false);
     }
   };
-  console.log("hi" + userData.userName);
+  console.log("hi " +  userData.name);
   
   const handlePasswordChange = async (e) => {
     e.preventDefault();
     
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      alert('New passwords do not match');
+      showWarning('Password Mismatch', 'New passwords do not match. Please try again.');
       return;
     }
 
     setSaveLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/users/change-password', {
+      const response = await fetch('/api/user/change-password', {
         method: 'PUT',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          'Authorization': `${token}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
@@ -194,15 +220,15 @@ const AccountSettings = () => {
       });
 
       if (response.ok) {
-        alert('Password changed successfully!');
+        showSuccess('Password Changed!', 'Your password has been updated successfully');
         setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
       } else {
         const error = await response.json();
-        alert(error.message || 'Failed to change password');
+        showError('Password Change Failed', error.message || 'Failed to change password');
       }
     } catch (error) {
       console.error('Error changing password:', error);
-      alert('Error changing password');
+      showError('Network Error', 'Unable to change password. Please check your connection.');
     } finally {
       setSaveLoading(false);
     }
@@ -213,10 +239,10 @@ const AccountSettings = () => {
     
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/users/vehicles', {
+      const response = await fetch('/api/user/vehicles', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          'Authorization': `${token}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(newVehicle)
@@ -226,13 +252,13 @@ const AccountSettings = () => {
         const data = await response.json();
         setVehicles([...vehicles, data.vehicle]);
         setNewVehicle({ make: '', model: '', year: '', color: '', licensePlate: '', vehicleType: 'car' });
-        alert('Vehicle added successfully!');
+        showSuccess('Vehicle Added!', 'Your vehicle has been added successfully');
       } else {
-        alert('Failed to add vehicle');
+        showError('Add Vehicle Failed', 'Failed to add vehicle. Please try again.');
       }
     } catch (error) {
       console.error('Error adding vehicle:', error);
-      alert('Error adding vehicle');
+      showError('Network Error', 'Unable to add vehicle. Please check your connection.');
     }
   };
 
@@ -241,22 +267,22 @@ const AccountSettings = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/users/vehicles/${vehicleId}`, {
+      const response = await fetch(`/api/user/vehicles/${vehicleId}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${token}`
+          'Authorization': `${token}`
         }
       });
 
       if (response.ok) {
         setVehicles(vehicles.filter(v => v._id !== vehicleId));
-        alert('Vehicle deleted successfully!');
+        showSuccess('Vehicle Deleted!', 'Your vehicle has been removed successfully');
       } else {
-        alert('Failed to delete vehicle');
+        showError('Delete Failed', 'Failed to delete vehicle. Please try again.');
       }
     } catch (error) {
       console.error('Error deleting vehicle:', error);
-      alert('Error deleting vehicle');
+      showError('Network Error', 'Unable to delete vehicle. Please check your connection.');
     }
   };
 
@@ -271,7 +297,7 @@ const AccountSettings = () => {
   const handleDeleteAccount = () => {
     if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
       // Implement account deletion logic
-      alert('Account deletion requested. Please contact support to complete this process.');
+      showWarning('Account Deletion', 'Account deletion requested. Please contact support to complete this process.');
     }
   };
 
@@ -930,6 +956,7 @@ const AccountSettings = () => {
           </div>
         </div>
       </div>
+      <AlertComponent />
     </div>
   );
 };

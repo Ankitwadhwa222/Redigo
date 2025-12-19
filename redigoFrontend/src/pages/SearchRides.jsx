@@ -17,6 +17,27 @@ const SearchRides = () => {
   const [loading, setLoading] = useState(false);
   const [sortBy, setSortBy] = useState("date");
   const [showFilters, setShowFilters] = useState(false);
+  const [userBookings, setUserBookings] = useState([]);
+
+  // Fetch user's existing bookings
+  const fetchUserBookings = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/rides/user/booked/active`, {
+        headers: { 
+          'Authorization': token.startsWith('Bearer ') ? token : `Bearer ${token}`
+        }
+      });
+      const data = await res.json();
+      if (data.success) {
+        setUserBookings(data.rides || []);
+      }
+    } catch (error) {
+      console.error("Error fetching user bookings:", error);
+    }
+  };
 
   // Extract URL parameters and pre-fill form
   useEffect(() => {
@@ -34,11 +55,41 @@ const SearchRides = () => {
     };
 
     setFormData(newFormData);
+    fetchUserBookings(); // Fetch user bookings on component mount
 
     if (from && to) {
       handleSearch(newFormData);
     }
   }, [location.search]);
+
+  // Check if user already booked this ride
+  const isAlreadyBooked = (rideId) => {
+    return userBookings.some(booking => booking._id === rideId);
+  };
+
+  // Check for time conflicts (within 2 hours)
+  const hasTimeConflict = (rideDate) => {
+    const rideTime = new Date(rideDate).getTime();
+    const timeBuffer = 2 * 60 * 60 * 1000; // 2 hours
+
+    return userBookings.some(booking => {
+      const bookingTime = new Date(booking.date).getTime();
+      const timeDiff = Math.abs(rideTime - bookingTime);
+      return timeDiff < timeBuffer;
+    });
+  };
+
+  // Get conflict details for display
+  const getConflictDetails = (rideDate) => {
+    const rideTime = new Date(rideDate).getTime();
+    const timeBuffer = 2 * 60 * 60 * 1000; // 2 hours
+
+    return userBookings.find(booking => {
+      const bookingTime = new Date(booking.date).getTime();
+      const timeDiff = Math.abs(rideTime - bookingTime);
+      return timeDiff < timeBuffer;
+    });
+  };
 
   const handleChange = (e) => {
     setFormData({
@@ -70,8 +121,22 @@ const SearchRides = () => {
     }
   };
 
-  const handleBookRide = (rideId) => {
-    // Navigate to booking page or show booking modal
+  const handleBookRide = (rideId, rideData) => {
+    // Check if already booked
+    if (isAlreadyBooked(rideId)) {
+      alert("❌ You have already booked this ride!");
+      return;
+    }
+
+    // Check for time conflicts
+    if (hasTimeConflict(rideData.date)) {
+      const conflictRide = getConflictDetails(rideData.date);
+      const conflictDate = new Date(conflictRide.date).toLocaleString();
+      alert(`❌ Time Conflict!\n\nYou already have a ride booked at ${conflictDate} from ${conflictRide.from} to ${conflictRide.to}.\n\nCannot book overlapping rides within 2 hours of each other.`);
+      return;
+    }
+
+    // If no conflicts, proceed to booking
     navigate(`/checkout/${rideId}`);
   };
 
@@ -257,35 +322,54 @@ const SearchRides = () => {
 
         {/* Results Grid */}
         <div className="space-y-4">
-          {sortedResults.map((ride, index) => (
-            <div
-              key={ride._id || index}
-              className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 overflow-hidden"
-            >
-              <div className="p-6">
-                <div className="flex flex-col lg:flex-row gap-6">
-                  {/* Driver Info */}
-                  <div className="flex items-center gap-4 lg:w-64">
-                    <div className="relative">
-                      <div className="h-16 w-16 rounded-full bg-gradient-to-r from-cyan-500 to-cyan-700 flex items-center justify-center text-white font-bold text-xl shadow-lg">
-                        {ride.driver?.name?.charAt(0) || 'D'}
+          {sortedResults.map((ride, index) => {
+            const isRideFull = ride.availableSeats === 0;
+            const alreadyBooked = isAlreadyBooked(ride._id);
+            const timeConflict = hasTimeConflict(ride.date);
+            const isBookingDisabled = isRideFull || alreadyBooked || timeConflict;
+            
+            // Get conflict details for display
+            const conflictRide = timeConflict ? getConflictDetails(ride.date) : null;
+            
+            return (
+              <div
+                key={ride._id || index}
+                className={`bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 overflow-hidden ${
+                  isBookingDisabled ? 'opacity-60 bg-gray-50' : ''
+                }`}
+              >
+                <div className="p-6">
+                  <div className="flex flex-col lg:flex-row gap-6">
+                    {/* Driver Info */}
+                    <div className="flex items-center gap-4 lg:w-64">
+                      <div className="relative">
+                        <div className={`h-16 w-16 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg ${
+                          isBookingDisabled 
+                            ? 'bg-gradient-to-r from-gray-400 to-gray-500' 
+                            : 'bg-gradient-to-r from-cyan-500 to-cyan-700'
+                        }`}>
+                          {ride.driver?.name?.charAt(0) || 'D'}
+                        </div>
+                        <div className={`absolute -bottom-1 -right-1 h-6 w-6 rounded-full border-2 border-white flex items-center justify-center ${
+                          isBookingDisabled ? 'bg-gray-400' : 'bg-green-500'
+                        }`}>
+                          <div className="h-2 w-2 bg-white rounded-full"></div>
+                        </div>
                       </div>
-                      <div className="absolute -bottom-1 -right-1 h-6 w-6 bg-green-500 rounded-full border-2 border-white flex items-center justify-center">
-                        <div className="h-2 w-2 bg-white rounded-full"></div>
+                      <div>
+                        <h4 className={`font-bold text-lg ${isBookingDisabled ? 'text-gray-500' : 'text-gray-900'}`}>
+                          {ride.driver?.name || 'Unknown Driver'}
+                        </h4>
+                        <div className="flex items-center space-x-1 mt-1">
+                          <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                          <span className={`text-sm font-semibold ${isBookingDisabled ? 'text-gray-400' : 'text-gray-700'}`}>
+                            {ride.driver?.rating || 'N/A'}
+                          </span>
+                          <span className="text-xs text-gray-500">(25 reviews)</span>
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">Verified Driver</p>
                       </div>
                     </div>
-                    <div>
-                      <h4 className="font-bold text-gray-900 text-lg">{ride.driver?.name || 'Unknown Driver'}</h4>
-                      <div className="flex items-center space-x-1 mt-1">
-                        <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                        <span className="text-sm font-semibold text-gray-700">
-                          {ride.driver?.rating || 'N/A'}
-                        </span>
-                        <span className="text-xs text-gray-500">(25 reviews)</span>
-                      </div>
-                      <p className="text-xs text-gray-500 mt-1">Verified Driver</p>
-                    </div>
-                  </div>
 
                   {/* Route Info */}
                   <div className="flex-1">
@@ -338,12 +422,27 @@ const SearchRides = () => {
                       <div className="space-y-2">
                         <div className="flex items-center space-x-2">
                           <Users className="w-4 h-4 text-gray-400" />
-                          <span className="text-sm font-medium text-gray-900">
-                            {ride.availableSeats} seats available
+                          <span className={`text-sm font-medium ${
+                            isRideFull ? 'text-red-500' : 
+                            alreadyBooked ? 'text-blue-600' :
+                            timeConflict ? 'text-orange-500' : 'text-gray-900'
+                          }`}>
+                            {isRideFull ? 'FULL - No seats available' : 
+                             alreadyBooked ? 'ALREADY BOOKED' :
+                             timeConflict ? 'TIME CONFLICT' : 
+                             `${ride.availableSeats} seats available`}
                           </span>
                         </div>
+                        {timeConflict && conflictRide && (
+                          <div className="text-xs text-orange-600 mt-1">
+                            Conflicts with: {conflictRide.from} → {conflictRide.to}
+                            <br />at {new Date(conflictRide.date).toLocaleString()}
+                          </div>
+                        )}
                         <div className="text-right md:text-left">
-                          <p className="text-2xl font-bold text-cyan-600">₹{ride.price}</p>
+                          <p className={`text-2xl font-bold ${isBookingDisabled ? 'text-gray-400' : 'text-cyan-600'}`}>
+                            ₹{ride.price}
+                          </p>
                           <p className="text-xs text-gray-500">per person</p>
                         </div>
                       </div>
@@ -359,14 +458,28 @@ const SearchRides = () => {
                   {/* Action Buttons */}
                   <div className="flex flex-col justify-center space-y-3 lg:w-40">
                     <button 
-                      onClick={() => handleBookRide(ride._id)}
-                      className="bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-green-600 hover:to-green-700 transition-all duration-300 shadow-lg"
+                      onClick={() => isBookingDisabled ? 
+                        handleBookRide(ride._id, ride) : // This will show the alert
+                        handleBookRide(ride._id, ride)   // This will navigate
+                      }
+                      disabled={isBookingDisabled}
+                      className={`px-6 py-3 rounded-lg font-semibold transition-all duration-300 shadow-lg ${
+                        isBookingDisabled
+                          ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                          : 'bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700'
+                      }`}
                     >
-                      Book Now
+                      {isRideFull ? 'FULL' : 
+                       alreadyBooked ? 'BOOKED' :
+                       timeConflict ? 'CONFLICT' : 'Book Now'}
                     </button>
                     <button 
                       onClick={() => handleContactDriver(ride)}
-                      className="flex items-center justify-center space-x-2 border-2 border-gray-300 text-gray-700 px-6 py-3 rounded-lg font-medium hover:border-cyan-500 hover:text-cyan-600 transition-all duration-300"
+                      className={`flex items-center justify-center space-x-2 border-2 px-6 py-3 rounded-lg font-medium transition-all duration-300 ${
+                        isBookingDisabled
+                          ? 'border-gray-300 text-gray-400'
+                          : 'border-gray-300 text-gray-700 hover:border-cyan-500 hover:text-cyan-600'
+                      }`}
                     >
                       <MessageCircle className="w-4 h-4" />
                       <span>Contact</span>
@@ -375,7 +488,8 @@ const SearchRides = () => {
                 </div>
               </div>
             </div>
-          ))}
+          );
+          })}
         </div>
       </div>
 

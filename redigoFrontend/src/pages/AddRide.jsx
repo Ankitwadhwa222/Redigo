@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom"; // ✅ missing import
+import { useParams, useNavigate } from "react-router-dom";
 import {
   CalendarIcon,
   Car,
@@ -7,14 +7,25 @@ import {
   Clock,
   Users,
   IndianRupee,
+  AlertCircle,
+  User,
+  Settings
 } from "lucide-react";
 import Header from "../components/Navbar";
 import Footer from "../components/Footer";
+import { useSimpleAlert } from "../components/SimpleAlert";
 
 const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
 const PublishRide = () => {
-  const { rideId } = useParams(); // ✅ now works
+  const { rideId } = useParams();
+  const navigate = useNavigate();
+  const { showSuccess, showError, showWarning, AlertComponent } = useSimpleAlert();
+  
+  const [userProfile, setUserProfile] = useState(null);
+  const [userVehicles, setUserVehicles] = useState([]);
+  const [profileCheckLoading, setProfileCheckLoading] = useState(true);
+  
   const [formData, setFormData] = useState({
     from: "",
     fromCoords: null,
@@ -34,8 +45,101 @@ const PublishRide = () => {
   });
 
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
   const [suggestions, setSuggestions] = useState({ from: [], to: [] });
+
+  // Check profile completion and vehicles on component mount
+  useEffect(() => {
+    checkProfileAndVehicles();
+  }, []);
+
+  const checkProfileAndVehicles = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        showError('Authentication Required', 'Please login to publish rides');
+        navigate('/signin');
+        return;
+      }
+
+      // Fetch user profile
+      const profileResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/user/profile`, {
+        headers: {
+          Authorization: `${token}`,
+        },
+      });
+
+      if (profileResponse.ok) {
+        const profileData = await profileResponse.json();
+        setUserProfile(profileData.user);
+      }
+
+      // Fetch user vehicles
+      const vehiclesResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/user/vehicles`, {
+        headers: {
+          Authorization: `${token}`,
+        },
+      });
+
+      if (vehiclesResponse.ok) {
+        const vehiclesData = await vehiclesResponse.json();
+        setUserVehicles(vehiclesData.vehicles || []);
+      }
+    } catch (error) {
+      console.error('Error checking profile and vehicles:', error);
+      showError('Error', 'Unable to verify profile. Please try again.');
+    } finally {
+      setProfileCheckLoading(false);
+    }
+  };
+
+  const isProfileComplete = () => {
+    if (!userProfile) return false;
+    
+    const requiredFields = ['name', 'email', 'phone'];
+    return requiredFields.every(field => userProfile[field] && userProfile[field].trim() !== '');
+  };
+
+  const hasVehicles = () => {
+    return userVehicles && userVehicles.length > 0;
+  };
+
+  const validateUserEligibility = () => {
+    if (!isProfileComplete()) {
+      showWarning(
+        'Incomplete Profile', 
+        'Please complete your profile with name, email, and phone number before publishing rides.',
+        {
+          actions: [
+            {
+              label: 'Complete Profile',
+              variant: 'primary',
+              onClick: () => navigate('/settings')
+            }
+          ]
+        }
+      );
+      return false;
+    }
+
+    if (!hasVehicles()) {
+      showWarning(
+        'No Vehicle Added', 
+        'Please add at least one vehicle to your profile before publishing rides.',
+        {
+          actions: [
+            {
+              label: 'Add Vehicle',
+              variant: 'primary', 
+              onClick: () => navigate('/settings?tab=vehicles')
+            }
+          ]
+        }
+      );
+      return false;
+    }
+
+    return true;
+  };
 
   useEffect(() => {
     if (rideId) {
@@ -142,8 +246,13 @@ const PublishRide = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Check profile and vehicle requirements before proceeding
+    if (!validateUserEligibility()) {
+      return;
+    }
+    
     setLoading(true);
-    setMessage("");
 
     if (
       !formData.from ||
@@ -155,7 +264,7 @@ const PublishRide = () => {
       !formData.driverName ||
       !formData.phone
     ) {
-      setMessage("Please fill in all required fields");
+      showWarning("Missing Fields", "Please fill in all required fields");
       setLoading(false);
       return;
     }
@@ -171,7 +280,7 @@ const PublishRide = () => {
         date: dateTime.toISOString(),
         time: formData.time,
         availableSeats: parseInt(formData.availableSeats),
-        price: parseFloat(formData.price),
+        price: parseInt(formData.price),
         driver: {
           name: formData.driverName,
           rating: 5,
@@ -204,11 +313,12 @@ const PublishRide = () => {
 
       const result = await response.json();
       if (result.success) {
-        setMessage(
-          rideId
-            ? " Ride updated successfully!"
-            : " Ride published successfully!"
-        );
+        if (rideId) {
+          showSuccess("Ride Updated!", "Your ride has been updated successfully");
+        } else {
+          showSuccess("Ride Published!", "Your ride is now live and available for booking");
+        }
+        
         if (!rideId) {
           setFormData({
             from: "",
@@ -229,11 +339,11 @@ const PublishRide = () => {
           });
         }
       } else {
-        setMessage(`❌ Error: ${result.message || "Failed to save ride"}`);
+        showError("Error", result.message || "Failed to save ride");
       }
     } catch (error) {
       console.error("Error publishing ride:", error);
-      setMessage("❌ Network error. Please try again.");
+      showError("Network Error", "Please check your connection and try again");
     } finally {
       setLoading(false);
     }
@@ -250,15 +360,55 @@ const PublishRide = () => {
             </span>
           </h2>
 
-           {message && (
-            <div
-              className={`mb-6 p-4 rounded-lg text-center ${
-                message.includes("✅")
-                  ? "bg-green-100 text-green-700"
-                  : "bg-red-100 text-red-700"
-              }`}
-            >
-              {message}
+          {/* Profile & Vehicle Status */}
+          {!profileCheckLoading && (
+            <div className="mb-6 space-y-3">
+              <div className={`flex items-center gap-3 p-3 rounded-lg border ${
+                isProfileComplete() 
+                  ? 'bg-green-50 border-green-200 text-green-700' 
+                  : 'bg-red-50 border-red-200 text-red-700'
+              }`}>
+                <User className="h-5 w-5" />
+                <span className="font-medium">
+                  {isProfileComplete() ? '✓ Profile Complete' : '⚠ Profile Incomplete'}
+                </span>
+                {!isProfileComplete() && (
+                  <button
+                    onClick={() => navigate('/settings')}
+                    className="ml-auto text-sm bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition-colors"
+                  >
+                    Complete Profile
+                  </button>
+                )}
+              </div>
+
+              <div className={`flex items-center gap-3 p-3 rounded-lg border ${
+                hasVehicles() 
+                  ? 'bg-green-50 border-green-200 text-green-700' 
+                  : 'bg-red-50 border-red-200 text-red-700'
+              }`}>
+                <Car className="h-5 w-5" />
+                <span className="font-medium">
+                  {hasVehicles() ? `✓ ${userVehicles.length} Vehicle(s) Added` : '⚠ No Vehicles Added'}
+                </span>
+                {!hasVehicles() && (
+                  <button
+                    onClick={() => navigate('/settings?tab=vehicles')}
+                    className="ml-auto text-sm bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition-colors"
+                  >
+                    Add Vehicle
+                  </button>
+                )}
+              </div>
+
+              {(!isProfileComplete() || !hasVehicles()) && (
+                <div className="flex items-center gap-2 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-yellow-700">
+                  <AlertCircle className="h-5 w-5" />
+                  <span className="text-sm font-medium">
+                    Complete your profile and add a vehicle to publish rides
+                  </span>
+                </div>
+              )}
             </div>
           )}
 
@@ -500,23 +650,43 @@ const PublishRide = () => {
             <div>
               <button
                 type="submit"
-                disabled={loading}
-                className="w-full bg-cyan-800 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={loading || !isProfileComplete() || !hasVehicles()}
+                className={`w-full py-3 rounded-lg font-semibold transition ${
+                  loading || !isProfileComplete() || !hasVehicles()
+                    ? 'bg-gray-400 text-gray-300 cursor-not-allowed'
+                    : 'bg-cyan-800 text-white hover:bg-cyan-700'
+                }`}
               >
                 {loading
                   ? rideId
                     ? "Updating Ride..."
                     : "Publishing Ride..."
+                  : (!isProfileComplete() || !hasVehicles())
+                  ? "Complete Requirements Above"
                   : rideId
                   ? "Update Ride"
                   : "Publish Ride"}
               </button>
+              
+              {(!isProfileComplete() || !hasVehicles()) && (
+                <div className="mt-3 text-center">
+                  <button
+                    type="button"
+                    onClick={() => navigate('/settings')}
+                    className="inline-flex items-center gap-2 text-cyan-600 hover:text-cyan-700 text-sm font-medium"
+                  >
+                    <Settings className="h-4 w-4" />
+                    Go to Settings
+                  </button>
+                </div>
+              )}
             </div>
           </form>
         </div>
       </main>
 
       <Footer />
+      <AlertComponent />
     </div>
   );
 };

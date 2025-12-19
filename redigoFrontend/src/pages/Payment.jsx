@@ -78,7 +78,7 @@ const PaymentPage = () => {
 
         const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/rides/${rideId}`, {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`
+            Authorization: `${localStorage.getItem("token")}`
           }
         });
         
