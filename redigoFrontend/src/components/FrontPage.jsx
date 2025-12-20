@@ -206,7 +206,7 @@ const FrontPage = () => {
           <div className="relative">
             <div className="absolute inset-0 rounded-3xl blur-3xl"></div>
             <img
-              src="public/Screenshot_2025-10-07_104340-removebg-preview.png"
+              src="/Screenshot_2025-10-07_104340-removebg-preview.png"
               alt="People carpooling together in a modern, safe environment"
               className="relative rounded-2xl ml-5 w-full h-auto"
             />
