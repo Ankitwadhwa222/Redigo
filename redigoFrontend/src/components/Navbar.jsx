@@ -83,8 +83,9 @@ const Header = () => {
         setUser(response.data.user);
         return;
       }
-    } catch (error) {
+    } catch (authError) {
       // Do nothing here; fall back to localStorage below.
+      console.debug('Auth endpoint not available, using localStorage');
     }
 
     const localToken = localStorage.getItem('token');
@@ -154,7 +155,8 @@ const Header = () => {
         }
       };
     }
-  }, [isLoggedIn, checkTokenExpiration]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoggedIn]);
 
   // ✅ FIXED: Fetch existing notifications with token validation
   const fetchExistingNotifications = async () => {

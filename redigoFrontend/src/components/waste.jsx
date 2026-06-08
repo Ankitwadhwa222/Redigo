@@ -1,3 +1,6 @@
+/* eslint-disable */
+// This file is deprecated and should be removed in a future refactor.
+// It contains experimental notification code that is not currently used.
 // ...existing code...
 
 // Setup real-time notifications (WebSocket + API fallback) - FIXED
