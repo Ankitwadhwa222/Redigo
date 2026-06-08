@@ -21,6 +21,7 @@ import {
   Gift
 } from "lucide-react";
 import Header from "../components/Navbar";
+import { getAuthHeaders } from '../utils/authHeaders';
 
 const PaymentPage = () => {
   const { rideId } = useParams();
@@ -44,7 +45,7 @@ const PaymentPage = () => {
 } else if (token) {
   // Try to fetch real user profile from backend
   axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/user/profile`, {
-    headers: { Authorization: `${token}` },
+    headers: getAuthHeaders(),
   })
   .then(res => setCurrentUser(res.data.user))
   .catch(() => {
@@ -77,9 +78,7 @@ const PaymentPage = () => {
         console.log("Fetching ride details for ID:", rideId);
 
         const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/rides/${rideId}`, {
-          headers: {
-            Authorization: `${localStorage.getItem("token")}`
-          }
+          headers: getAuthHeaders()
         });
         
         console.log("Ride details fetched:", response.data);

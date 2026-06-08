@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 const express = require('express');
 const  OTP = require('../models/otp');
-const sendOTP = require("../config/nodemailerconfig");
+const { sendMail } = require("../config/nodemailerconfig");
 
 const User = require('../models/User');
 
@@ -24,8 +24,24 @@ router.post("/send-otp" , async (req, res) => {
                otp,
                expiresAt
           })
-          await sendOTP.sendMail(email, "Your OTP for Redigo", otp);
-          res.status(200).json({message : "OTP sent successfully"});
+
+          // Send OTP via nodemailer
+          try {
+               await sendMail(email, "Your Redigo Verification Code", otp);
+               console.log("✅ OTP sent successfully via Nodemailer");
+               res.status(200).json({
+                    message: "OTP sent successfully",
+                    provider: "Nodemailer"
+               });
+          } catch (emailError) {
+               console.error("❌ Email sending failed:", emailError.message);
+               // Still return success since OTP is saved in DB, user can retry
+               res.status(200).json({
+                    message: "OTP generated and saved. Email delivery may be delayed due to service issues.",
+                    warning: "Please check your email in a few minutes or request a new OTP if needed.",
+                    emailError: true
+               });
+          }
      }
 
      catch (error) {
@@ -50,12 +66,65 @@ router.post("/verify-otp", async (req, res) => {
 
           const token = jwt.sign({id : user._id} , process.env.JWT_SECRET , {expiresIn : "1h"});
 
-          res.status(200).json({message : "OTP verified successfully" , token});
+          res.cookie('token', token, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'none', maxAge: 7*24*60*60*1000 });
+          res.status(200).json({message : "OTP verified successfully", token, user: { id: user._id, name: user.name, email: user.email } });
      }
      catch (error) {
           console.error("Error verifying OTP:", error);
           res.status(500).json({message : "Internal server error"});
      }
+});
+
+// Test email endpoint for debugging
+router.post("/test-email", async (req, res) => {
+     try {
+          const { email } = req.body;
+          
+          if (!email) {
+               return res.status(400).json({ 
+                    success: false, 
+                    message: 'Email is required' 
+               });
+          }
+
+          console.log('🧪 Testing email delivery to:', email);
+          console.log('🔧 Using Email:', process.env.EMAIL ? 'Present' : 'Missing');
+          console.log('🔧 Using App Password:', process.env.EMAIL_PASSWORD ? 'Present' : 'Missing');
+          
+          const testOTP = Math.floor(100000 + Math.random() * 900000);
+          
+          await sendMail(email, "🧪 Test Email - Redigo OTP Service", testOTP);
+          
+          console.log('✅ Test email sent successfully via Nodemailer');
+          
+          res.status(200).json({
+               success: true,
+               message: 'Test email sent successfully!',
+               provider: 'Nodemailer',
+               testOTP: testOTP,
+               emailService: 'Nodemailer configured'
+          });
+
+     } catch (error) {
+          console.error('❌ Test email failed:', error);
+          res.status(500).json({
+               success: false,
+               message: 'Test email failed',
+               error: error.message,
+               emailService: 'Nodemailer - Error occurred'
+          });
+     }
+});
+
+// Email service status endpoint
+router.get("/email-status", (req, res) => {
+     const emailConfigured = !!(process.env.EMAIL && process.env.EMAIL_PASSWORD);
+     res.status(200).json({
+          status: emailConfigured,
+          message: emailConfigured ? "Nodemailer service available" : "Email service not configured",
+          service: "Nodemailer with Gmail SMTP",
+          configured: emailConfigured ? "Available" : "Not configured"
+     });
 });
 
 module.exports = router;

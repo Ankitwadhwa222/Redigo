@@ -4,15 +4,14 @@ const Chat = require('../models/chat');
 
 const router = express.Router();
 
-// ✅ Get conversations for Messages page (SPECIFIC ROUTE FIRST)
-// ✅ UPDATED: Get conversations with actual user names
+ 
 router.get('/conversations/:userId', protect, async (req, res) => {
   try {
     const currentUserId = req.user._id;
     
     console.log("Fetching conversations for user:", currentUserId);
     
-    // ✅ Find all messages where user is involved
+    
     const messages = await Chat.find({
       $or: [
         { userId: currentUserId },
@@ -29,16 +28,16 @@ router.get('/conversations/:userId', protect, async (req, res) => {
       });
     }
     
-    // ✅ Import User model to get actual user details
+     
     const User = require('../models/User');
     
-    // ✅ Group by rideId and create unique conversations
+  
     const conversationMap = new Map();
     
     for (const msg of messages) {
       const rideId = msg.rideId;
+   
       
-      // ✅ Determine the other user
       let otherUserId;
       if (msg.userId.toString() !== currentUserId.toString()) {
         otherUserId = msg.userId.toString();
@@ -63,22 +62,22 @@ router.get('/conversations/:userId', protect, async (req, res) => {
       } else {
         const existing = conversationMap.get(uniqueKey);
         existing.messageCount++;
-        // Update last message if this one is newer
+        
         if (new Date(msg.timestamp) > new Date(existing.lastMessage.timestamp)) {
           existing.lastMessage = msg;
         }
       }
     }
     
-    // ✅ Fetch actual user details and ride details
+    
     const conversations = [];
     
     for (const conv of conversationMap.values()) {
       try {
-        // ✅ Get actual user details
+         
         const otherUser = await User.findById(conv.otherUserId).select('name email phone');
         
-        // ✅ Get ride details
+     
         const Ride = require('../models/Ride');
         const ride = await Ride.findById(conv.rideId);
         
@@ -142,7 +141,7 @@ router.get('/conversations/:userId', protect, async (req, res) => {
       }
     }
     
-    // Sort by last message timestamp
+    
     conversations.sort((a, b) => 
       new Date(b.lastMessage.timestamp) - new Date(a.lastMessage.timestamp)
     );
@@ -161,7 +160,7 @@ router.get('/conversations/:userId', protect, async (req, res) => {
     });
   }
 });
-// ✅ Get passenger info from chat history for driver
+ 
 router.get('/passenger/:rideId', protect, async (req, res) => {
   try {
     const { rideId } = req.params;
@@ -182,7 +181,7 @@ router.get('/passenger/:rideId', protect, async (req, res) => {
       });
     }
     
-    // Get full user details
+ 
     const User = require('../models/User');
     const passenger = await User.findById(message.userId).select('name email phone');
     
@@ -212,9 +211,7 @@ router.get('/passenger/:rideId', protect, async (req, res) => {
   }
 });
 
-// ✅ Get 1-on-1 chat history (GENERIC ROUTE AFTER SPECIFIC ROUTES)
-// ✅ FIXED: Get ALL messages between two users in a ride
-// ✅ FIXED: Get complete chat history for current user in a ride
+ 
 router.get('/:rideId/:userId', protect, async (req, res) => {
   try {
     const { rideId, userId } = req.params;
@@ -222,7 +219,7 @@ router.get('/:rideId/:userId', protect, async (req, res) => {
     
     console.log('Fetching chat history for ride:', rideId, 'user:', currentUserId);
     
-    // ✅ Find ALL messages for this specific ride
+ 
     const messages = await Chat.find({
       rideId: rideId
     })
@@ -231,8 +228,6 @@ router.get('/:rideId/:userId', protect, async (req, res) => {
     
     console.log(`Found ${messages.length} total messages for ride`);
     
-    // ✅ Show ALL messages in the ride (complete conversation)
-    // This ensures both driver and passenger see the full chat
     
     res.json({
       success: true,
@@ -247,8 +242,7 @@ router.get('/:rideId/:userId', protect, async (req, res) => {
     });
   }
 });
-
-// ✅ Save new message
+ 
 router.post('/', protect, async (req, res) => {
   try {
     const { rideId, message, otherUserId } = req.body;

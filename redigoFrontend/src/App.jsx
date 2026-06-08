@@ -17,6 +17,7 @@ import PaymentPage from './pages/Payment'
 import BookedRides from './pages/Bookedride'
 import Safety from './pages/Safety'
 import AccountSettings from './pages/Settings'
+import Chatbot from './components/Chatbot'
 
 function App() {
   
@@ -80,8 +81,7 @@ function App() {
         </ProtectedRoutes>
       } />
       </Routes>
-
-
+      <Chatbot />
       </main>
      </BrowserRouter>
     </>

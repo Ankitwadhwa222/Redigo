@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import axios from 'axios';
 import Header from '../components/Navbar';
+import { getAuthHeaders, getStoredToken } from '../utils/authHeaders';
 
 const BookedRides = () => {
   const navigate = useNavigate();
@@ -44,7 +45,7 @@ const fetchBookedRides = async () => {
     setLoading(true);
     setError(null);
     
-    const token = localStorage.getItem('token');
+    const token = getStoredToken();
     
     if (!token) {
       setError('Please login to view your rides');
@@ -52,9 +53,22 @@ const fetchBookedRides = async () => {
       return;
     }
 
-    const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/rides/user/booked`, {
-      headers: { Authorization: `${token}` }
-    });
+    let response;
+    try {
+      response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/rides/user/booked`, {
+        headers: getAuthHeaders(),
+        withCredentials: true
+      });
+    } catch (err) {
+      if (err.response?.status === 404) {
+        response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/user/booked-rides`, {
+          headers: getAuthHeaders(),
+          withCredentials: true
+        });
+      } else {
+        throw err;
+      }
+    }
 
     if (response.data.success) {
       // Process rides and auto-update status based on date
@@ -411,7 +425,7 @@ const filteredRides = bookedRides.filter(ride => {
                       {ride.status === 'active' && (
                         <>
                           <button
-                            onClick={() => navigate(`/ride/${ride._id}/track`)}
+                            onClick={() => navigate(`/ride/${ride._id}/tracking`)}
                             className="flex items-center space-x-2 bg-cyan-600 text-white px-4 py-2 rounded-lg hover:bg-cyan-700 transition-colors"
                           >
                             <Navigation className="h-4 w-4" />

@@ -201,7 +201,7 @@ const LiveMap = () => {
           
           try {
             const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/rides/${rideId}`, {
-              headers: { Authorization: `${token}` }
+              headers: getAuthHeaders()
             });
             
             if (!isMounted) return;

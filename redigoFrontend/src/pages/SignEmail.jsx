@@ -33,12 +33,20 @@ const SignEmail = () => {
     try {
       const response = await axios.post(
         `${import.meta.env.VITE_BACKEND_URL}/auth/signin/email`,
-        formData
+        formData,
+        {
+          withCredentials: true
+        }
       );
 
       console.log("Signin response:", response.data);
 
-      if (response.data.user || response.data.user.token) {
+      if (response.data.user || response.data.token) {
+        if (response.data.token) {
+          localStorage.setItem('token', response.data.token);
+          localStorage.setItem('user', JSON.stringify(response.data.user));
+        }
+
         // send OTP
         await axios.post(`${import.meta.env.VITE_BACKEND_URL}/auth/send-otp`, {
           email: formData.email
@@ -72,19 +80,27 @@ const handleOtpSubmit = async (e) => {
       {
         email: formData.email,
         otp
+      },
+      {
+        withCredentials: true
       }
     );
 
     console.log("Verify OTP response:", response.data);
  
-    if (response.data.token) {  
-      localStorage.setItem('token', "Bearer " + response.data.token);
-      
-      setMessage("✅ Login successful!");
-      setTimeout(() => navigate("/"), 1500);
-    } else {
-      setMessage("❌ Invalid OTP. Please try again.");
-    }
+    if (response.data.message === "OTP verified successfully") {  
+        if (response.data.token) {
+          localStorage.setItem('token', response.data.token);
+          localStorage.setItem('user', JSON.stringify(response.data.user));
+        }
+        setMessage("✅ Login successful!");
+        setTimeout(() => {
+          navigate("/");
+          window.location.reload();
+        }, 1500);
+      } else {
+        setMessage("❌ Invalid OTP. Please try again.");
+      }
   } catch (error) {
     console.error(error);
     setMessage(

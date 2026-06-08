@@ -14,6 +14,7 @@ import {
 import Header from "../components/Navbar";
 import Footer from "../components/Footer";
 import { useSimpleAlert } from "../components/SimpleAlert";
+import { getAuthHeaders } from '../utils/authHeaders';
 
 const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
@@ -63,9 +64,7 @@ const PublishRide = () => {
 
       // Fetch user profile
       const profileResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/user/profile`, {
-        headers: {
-          Authorization: `${token}`,
-        },
+        headers: getAuthHeaders(),
       });
 
       if (profileResponse.ok) {
@@ -75,9 +74,7 @@ const PublishRide = () => {
 
       // Fetch user vehicles
       const vehiclesResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/user/vehicles`, {
-        headers: {
-          Authorization: `${token}`,
-        },
+        headers: getAuthHeaders(),
       });
 
       if (vehiclesResponse.ok) {
@@ -306,7 +303,7 @@ const PublishRide = () => {
         method,
         headers: {
           "Content-Type": "application/json",
-          Authorization: `${token}`,
+          ...getAuthHeaders(),
         },
         body: JSON.stringify(rideData),
       });

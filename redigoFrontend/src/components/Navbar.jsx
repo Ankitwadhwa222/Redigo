@@ -63,51 +63,49 @@ const Header = () => {
     }
   };
 
-  // ✅ FIXED: Get valid token (refresh if expired)
+  // Get a valid auth token from cookie or localStorage
   const getValidToken = async () => {
-    let token = localStorage.getItem("token");
-    
-    if (!token) {
-      console.log('❌ No token found, redirecting to login');
-      navigate('/login');
-      return null;
+    const localToken = localStorage.getItem('token');
+    if (localToken) {
+      return localToken.startsWith('Bearer ') ? localToken : `Bearer ${localToken}`;
+    }
+    return null;
+  };
+
+  // Check authentication status
+  const checkAuth = async () => {
+    try {
+      const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/auth/me`, {
+        withCredentials: true
+      });
+      if (response.data.authenticated) {
+        setIsLoggedIn(true);
+        setUser(response.data.user);
+        return;
+      }
+    } catch (error) {
+      // Do nothing here; fall back to localStorage below.
     }
 
-    // Clean token (remove Bearer if present)
-    const cleanToken = token.replace('Bearer ', '').trim();
-    
-    if (isTokenExpired(cleanToken)) {
-      console.log('⏰ Token expired, attempting refresh...');
-      
+    const localToken = localStorage.getItem('token');
+    const localUser = localStorage.getItem('user');
+    if (localToken && localUser) {
       try {
-        // Try to refresh token
-        const refreshResponse = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/auth/refresh-token`, {}, {
-          headers: {
-            Authorization: `Bearer ${cleanToken}`
-          }
-        });
-
-        if (refreshResponse.data.token) {
-          const newToken = refreshResponse.data.token;
-          localStorage.setItem("token", newToken);
-          console.log('✅ Token refreshed successfully');
-          return `Bearer ${newToken}`;
-        }
-      } catch (refreshError) {
-        console.error('❌ Token refresh failed:', refreshError);
-        
-        // If refresh fails, clear storage and redirect to login
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
-        alert('Your session has expired. Please log in again.');
-        navigate('/login');
-        return null;
+        setUser(JSON.parse(localUser));
+        setIsLoggedIn(true);
+        return;
+      } catch (parseError) {
+        console.error('Error parsing local user data:', parseError);
       }
     }
 
-    // Return existing token with Bearer prefix
-    return token.startsWith('Bearer ') ? token : `Bearer ${cleanToken}`;
+    setIsLoggedIn(false);
+    setUser(null);
   };
+
+  useEffect(() => {
+    checkAuth();
+  }, [location.pathname]);
 
   // Handle scroll effect
   useEffect(() => {
@@ -117,20 +115,6 @@ const Header = () => {
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    const userData = localStorage.getItem("user");
-    
-    setIsLoggedIn(!!token);
-    if (userData) {
-      try {
-        setUser(JSON.parse(userData));
-      } catch (error) {
-        console.error("Error parsing user data:", error);
-      }
-    }
   }, []);
 
   // Close dropdown when clicking outside
@@ -310,6 +294,16 @@ const Header = () => {
     }
   };
 
+  // Clear auth storage and any stale app data
+  const clearAuthStorage = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('rideNotifications');
+    localStorage.removeItem('lastNotificationDate');
+    localStorage.removeItem('rides');
+    localStorage.removeItem('profile');
+  };
+
   // ✅ FIXED: Mark notification as read with token validation
   const markAsRead = async (notificationId) => {
     setNotifications(prev => {
@@ -416,15 +410,21 @@ const Header = () => {
   };
 
   // ✅ FIXED: Clean logout
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await axios.post(`${import.meta.env.VITE_BACKEND_URL}/auth/logout`, {}, {
+        withCredentials: true
+      });
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+
     // Cleanup polling
     if (pollingIntervalRef.current) {
       clearInterval(pollingIntervalRef.current);
     }
 
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    localStorage.removeItem("rideNotifications");
+    clearAuthStorage();
     setIsLoggedIn(false);
     setUser(null);
     setShowUserMenu(false);

@@ -103,13 +103,24 @@ const AccountSettings = () => {
   const fetchUserData = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('/api/user/profile', {
+      let response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/user/profile`, {
+        credentials: 'include',
         headers: {
-          'Authorization': `${token}`,
           'Content-Type': 'application/json'
         }
       });
+
+      if (!response.ok) {
+        const token = localStorage.getItem('token');
+        if (token) {
+          response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/user/profile`, {
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': token.startsWith('Bearer ') ? token : `Bearer ${token}`
+            }
+          });
+        }
+      }
 
       if (response.ok) {
         const data = await response.json();
@@ -120,28 +131,39 @@ const AccountSettings = () => {
           // Ensure dateOfBirth is formatted properly for date input
           dateOfBirth: data.user.dateOfBirth ? data.user.dateOfBirth.split('T')[0] : ''
         }));
-        
-     }
-} catch (error) {
-     console.error('Error fetching user data:', error);
-} finally {
-     setLoading(false);
-     console.log("hello" + userData);
+      } else {
+        const errorData = await response.json();
+        console.error('Error fetching user data:', errorData);
+      }
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+    } finally {
+      setLoading(false);
+      console.log("hello" + userData);
     }
   };
 
   const fetchVehicles = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/user/vehicles', {
+      const resOptions = {
         headers: {
-          'Authorization': `${token}`
+          'Content-Type': 'application/json'
         }
-      });
+      };
+
+      if (token) {
+        resOptions.headers['Authorization'] = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+      }
+
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/user/vehicles`, resOptions);
 
       if (response.ok) {
         const data = await response.json();
         setVehicles(data.vehicles || []);
+      } else {
+        const errorData = await response.json();
+        console.error('Error fetching vehicles:', errorData);
       }
     } catch (error) {
       console.error('Error fetching vehicles:', error);
@@ -170,11 +192,11 @@ const AccountSettings = () => {
       };
       
       console.log('Sending profile update data:', profileUpdateData);
-      const response = await fetch('/api/user/profile', {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/user/profile`, {
         method: 'PUT',
         headers: {
-          'Authorization': `${token}`,
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': token.startsWith('Bearer ') ? token : `Bearer ${token}` } : {})
         },
         body: JSON.stringify(profileUpdateData)
       });
@@ -207,11 +229,11 @@ const AccountSettings = () => {
     setSaveLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/user/change-password', {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/user/change-password`, {
         method: 'PUT',
         headers: {
-          'Authorization': `${token}`,
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': token.startsWith('Bearer ') ? token : `Bearer ${token}` } : {})
         },
         body: JSON.stringify({
           currentPassword: passwordData.currentPassword,
@@ -239,11 +261,11 @@ const AccountSettings = () => {
     
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/user/vehicles', {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/user/vehicles`, {
         method: 'POST',
         headers: {
-          'Authorization': `${token}`,
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': token.startsWith('Bearer ') ? token : `Bearer ${token}` } : {})
         },
         body: JSON.stringify(newVehicle)
       });
@@ -267,10 +289,10 @@ const AccountSettings = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/user/vehicles/${vehicleId}`, {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/user/vehicles/${vehicleId}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `${token}`
+          ...(token ? { 'Authorization': token.startsWith('Bearer ') ? token : `Bearer ${token}` } : {})
         }
       });
 
@@ -286,11 +308,23 @@ const AccountSettings = () => {
     }
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     if (confirm('Are you sure you want to logout?')) {
+      try {
+        await axios.post(`${import.meta.env.VITE_BACKEND_URL}/auth/logout`, {}, {
+          withCredentials: true
+        });
+      } catch (error) {
+        console.error('Logout error:', error);
+      }
       localStorage.removeItem('token');
       localStorage.removeItem('user');
+      localStorage.removeItem('rideNotifications');
+      localStorage.removeItem('lastNotificationDate');
+      localStorage.removeItem('profile');
+      localStorage.removeItem('rides');
       navigate('/signin');
+      setTimeout(() => window.location.reload(), 100);
     }
   };
 

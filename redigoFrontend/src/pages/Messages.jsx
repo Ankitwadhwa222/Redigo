@@ -10,6 +10,7 @@ import {
   Calendar,
 } from "lucide-react";
 import Header from "../components/Navbar";
+import { getAuthHeaders } from '../utils/authHeaders';
 
 const Messages = () => {
   const navigate = useNavigate();
@@ -31,9 +32,7 @@ const Messages = () => {
   const fetchCurrentUser = async (token) => {
     try {
       const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/user/profile`, {
-        headers: {
-          Authorization: `${token}`,
-        },
+        headers: getAuthHeaders(),
       });
       const data = await response.json();
       if (data.success) {
@@ -50,9 +49,7 @@ const Messages = () => {
     try {
       setLoading(true);
       const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/chat/conversations/${userId}`, {
-        headers: {
-          Authorization: token,
-        },
+        headers: getAuthHeaders(),
       });
       const data = await response.json();
       

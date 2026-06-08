@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import Header from "../components/Navbar";
+import { getAuthHeaders } from '../utils/authHeaders';
 import {
   Delete,
   Edit2,
@@ -40,9 +41,7 @@ function DashboardPage() {
 
   // 🔒 Ensure token exists and is valid
   const getAuthHeader = () => {
-    const token = localStorage.getItem("token");
-    if (!token) throw new Error("Token missing or expired. Please log in again.");
-    return { Authorization: `${token}` };
+    return getAuthHeaders();
   };
 
   // ✅ Fetch user profile

@@ -22,13 +22,8 @@ const SearchRides = () => {
   // Fetch user's existing bookings
   const fetchUserBookings = async () => {
     try {
-      const token = localStorage.getItem('token');
-      if (!token) return;
-
       const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/rides/user/booked/active`, {
-        headers: { 
-          'Authorization': token.startsWith('Bearer ') ? token : `Bearer ${token}`
-        }
+        credentials: 'include' // Send cookies
       });
       const data = await res.json();
       if (data.success) {

@@ -13,6 +13,7 @@ import {
   IndianRupee,
 } from "lucide-react";
 import Header from "../components/Navbar";
+import { getAuthHeaders } from '../utils/authHeaders';
 
 const socket = io(`${import.meta.env.VITE_BACKEND_URL}`, {
   transports: ["websocket", "polling"],
@@ -45,7 +46,7 @@ const RideChat = () => {
   const fetchCurrentUser = async (token) => {
     try {
       const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/user/profile`, {
-        headers: { Authorization: token },
+        headers: getAuthHeaders(),
       });
       const data = await response.json();
       if (data.success) {
@@ -70,7 +71,7 @@ const RideChat = () => {
     const token = localStorage.getItem("token");
 
     const rideResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/rides/${rideId}`, {
-      headers: { Authorization: token },
+      headers: getAuthHeaders(),
     });
     const rideData = await rideResponse.json();
 
@@ -135,7 +136,7 @@ const RideChat = () => {
       
       // Try to get passenger from chat history first
       const chatResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/chat/passenger/${rideId}`, {
-        headers: { Authorization: token },
+        headers: getAuthHeaders(),
       });
       
       if (chatResponse.ok) {
@@ -248,7 +249,7 @@ const fetchChatHistory = async () => {
     // ✅ FIX: Use currentUser._id directly for the API call
     const res = await fetch(
       `${import.meta.env.VITE_BACKEND_URL}/api/chat/${rideId}/${currentUser._id}`,
-      { headers: { Authorization: token } }
+      { headers: getAuthHeaders() }
     );
     const data = await res.json();
 
