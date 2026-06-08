@@ -1,5 +1,4 @@
 import { Shield, MessageCircle, MapPin, Zap, Users, Clock, Star, CreditCard } from "lucide-react";
-import { motion } from "framer-motion";
 
 const WhyChooseUs = () => {
   const features = [

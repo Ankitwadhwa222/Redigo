@@ -27,6 +27,7 @@ const Messages = () => {
     }
 
     fetchCurrentUser(token);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigate]);
 
   const fetchCurrentUser = async (token) => {

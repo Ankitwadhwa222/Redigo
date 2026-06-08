@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import Header from "../components/Navbar";
 import Footer from "../components/Footer";
-import { useSimpleAlert } from "../components/SimpleAlert";
+import { useSimpleAlert } from "../components/useSimpleAlert";
 import { getAuthHeaders } from '../utils/authHeaders';
 
 const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
@@ -51,6 +51,7 @@ const PublishRide = () => {
   // Check profile completion and vehicles on component mount
   useEffect(() => {
     checkProfileAndVehicles();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const checkProfileAndVehicles = async () => {
@@ -292,8 +293,6 @@ const PublishRide = () => {
         notes: formData.notes || undefined,
       };
 
-      const token = localStorage.getItem("token");
- 
       const url = rideId
         ? `${import.meta.env.VITE_BACKEND_URL}/api/rides/${rideId}`
         : `${import.meta.env.VITE_BACKEND_URL}/api/rides/addRide`;

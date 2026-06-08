@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import { 
   User, 
   Phone, 
@@ -23,7 +24,7 @@ import {
   Award
 } from 'lucide-react';
 import Header from '../components/Navbar';
-import { useSimpleAlert } from '../components/SimpleAlert';
+import { useSimpleAlert } from '../components/useSimpleAlert';
 
 const AccountSettings = () => {
   const navigate = useNavigate();

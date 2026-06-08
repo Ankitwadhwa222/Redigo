@@ -27,15 +27,10 @@ const BookedRides = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [filter, setFilter] = useState('all'); // all, upcoming, completed, cancelled
-  const [searchTerm, setSearchTerm] = useState('');
-  const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
-    const userData = localStorage.getItem('user');
-    if (userData) {
-      setCurrentUser(JSON.parse(userData));
-    }
     fetchBookedRides();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
  // In your BookedRides component, update the fetchBookedRides function

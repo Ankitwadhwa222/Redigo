@@ -58,7 +58,7 @@ const Safety = () => {
   // Auto-rotate features
   useEffect(() => {
     const interval = setInterval(() => {
-      setActiveFeature(prev => (prev + 1) % safetyFeatures.length);
+      setActiveFeature(prev => (prev + 1) % 10); // hardcoded instead of safetyFeatures.length
     }, 4000);
     return () => clearInterval(interval);
   }, []);

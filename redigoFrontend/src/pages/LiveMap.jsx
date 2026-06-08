@@ -5,6 +5,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import io from "socket.io-client";
 import Header from "../components/Navbar";
+import { getAuthHeaders } from "../utils/authHeaders";
 
 // ✅ Move constants outside component to prevent re-creation
 const GOOGLE_MAPS_LIBRARIES = ["geometry", "places", "marker"];
@@ -179,7 +180,6 @@ const LiveMap = () => {
       try {
         setLoading(true);
         
-        const token = localStorage.getItem("token");
         const userData = localStorage.getItem("user");
         
         let user;
@@ -905,14 +905,16 @@ const LiveMap = () => {
       
       return () => clearTimeout(timer);
     }
-  }, [map, isLoaded, rideDetails]); // Removed calculateRideRoute from deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [map, isLoaded, rideDetails]);
 
   // ✅ Calculate live route when both user locations are available
   useEffect(() => {
     if (currentLocation && otherUserLocation && isLoaded) {
       calculateLiveRoute(currentLocation, otherUserLocation);
     }
-  }, [currentLocation, otherUserLocation, isLoaded]); // Removed calculateLiveRoute from deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentLocation, otherUserLocation, isLoaded]);
 
   // ✅ Listen for other user's location updates
   useEffect(() => {

@@ -1,5 +1,4 @@
 import { Search, UserCheck, Car, CheckCircle } from "lucide-react";
-import { motion } from "framer-motion";
 
 const Works = () => {
   const steps = [

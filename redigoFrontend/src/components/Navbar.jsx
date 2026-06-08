@@ -44,7 +44,7 @@ const Header = () => {
   const pollingIntervalRef = useRef(null);
 
   // ✅ FIXED: Check if token is expired
-  const isTokenExpired = (token) => {
+  const checkTokenExpiration = (token) => {
     if (!token) return true;
     
     try {
@@ -57,8 +57,8 @@ const Header = () => {
       
       // Check if token is expired (with 5 minute buffer)
       return payload.exp < (currentTime + 300);
-    } catch (error) {
-      console.error('❌ Error parsing token:', error);
+    } catch (parseErr) {
+      console.error('❌ Error parsing token:', parseErr);
       return true;
     }
   };
@@ -154,7 +154,7 @@ const Header = () => {
         }
       };
     }
-  }, [isLoggedIn]);
+  }, [isLoggedIn, checkTokenExpiration]);
 
   // ✅ FIXED: Fetch existing notifications with token validation
   const fetchExistingNotifications = async () => {
@@ -273,16 +273,7 @@ const Header = () => {
     return iconMap[type] || '🔔';
   };
 
-  // Show browser notification
-  const showBrowserNotification = (notification) => {
-    if (Notification.permission === 'granted') {
-      new Notification(notification.title, {
-        body: notification.message,
-        icon: '/favicon.ico',
-        tag: notification.id
-      });
-    }
-  };
+  // Show browser notification - removed unused function
 
   // Request notification permission
   const requestNotificationPermission = async () => {
@@ -351,7 +342,7 @@ const Header = () => {
   };
 
   // ✅ FIXED: Update all notifications status with token validation
-  const updateAllNotificationsStatus = async (status) => {
+  const updateAllNotificationsStatus = async () => {
     try {
       const token = await getValidToken();
       if (!token) return;

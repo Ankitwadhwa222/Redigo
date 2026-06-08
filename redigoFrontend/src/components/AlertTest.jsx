@@ -1,5 +1,5 @@
 import React from 'react';
-import { useSimpleAlert } from './SimpleAlert';
+import { useSimpleAlert } from './useSimpleAlert';
 
 const AlertTest = () => {
   const { showSuccess, showError, showWarning, showInfo, AlertComponent } = useSimpleAlert();

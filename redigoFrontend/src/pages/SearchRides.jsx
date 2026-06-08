@@ -55,6 +55,7 @@ const SearchRides = () => {
     if (from && to) {
       handleSearch(newFormData);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.search]);
 
   // Check if user already booked this ride

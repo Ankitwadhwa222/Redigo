@@ -17,8 +17,9 @@ const ProtectedRoute = ({ children }) => {
           setIsLoading(false);
           return;
         }
-      } catch (error) {
+      } catch (authErr) {
         // Fall back to localStorage auth.
+        console.debug('Auth check failed, falling back to localStorage');
       }
 
       const localToken = localStorage.getItem('token');
