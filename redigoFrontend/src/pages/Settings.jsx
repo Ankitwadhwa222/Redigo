@@ -99,6 +99,7 @@ const AccountSettings = () => {
   useEffect(() => {
     fetchUserData();
     fetchVehicles();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchUserData = async () => {
@@ -310,6 +311,7 @@ const AccountSettings = () => {
   };
 
   const handleLogout = async () => {
+    // eslint-disable-next-line no-alert
     if (confirm('Are you sure you want to logout?')) {
       try {
         await axios.post(`${import.meta.env.VITE_BACKEND_URL}/auth/logout`, {}, {

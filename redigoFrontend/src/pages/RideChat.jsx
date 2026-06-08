@@ -40,10 +40,11 @@ const RideChat = () => {
       navigate("/signin");
       return;
     }
-    fetchCurrentUser(token);
+    fetchCurrentUser();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigate]);
 
-  const fetchCurrentUser = async (token) => {
+  const fetchCurrentUser = async () => {
     try {
       const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/user/profile`, {
         headers: getAuthHeaders(),
@@ -63,12 +64,12 @@ const RideChat = () => {
     if (rideId && currentUser) {
       fetchRideDetails();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rideId, currentUser]);
 
   const fetchRideDetails = async () => {
   try {
     setLoading(true);
-    const token = localStorage.getItem("token");
 
     const rideResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/rides/${rideId}`, {
       headers: getAuthHeaders(),
@@ -86,7 +87,6 @@ const RideChat = () => {
       
 
       const driverId = driver?.userId?._id || driver?.userId || driver?._id;
-      const passengerId = passenger?._id || passenger?.userId;
 
       // ✅ Determine if current user is driver or passenger
       const isCurrentUserDriver = currentUser._id === driverId;
@@ -128,21 +128,20 @@ const RideChat = () => {
   }
 };
 
-
-  // ✅ NEW: Get passenger info for driver
-  const fetchPassengerInfo = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      
-      // Try to get passenger from chat history first
-      const chatResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/chat/passenger/${rideId}`, {
-        headers: getAuthHeaders(),
-      });
-      
-      if (chatResponse.ok) {
-        const chatData = await chatResponse.json();
-        if (chatData.success && chatData.passenger) {
-          setOtherUser({
+  // ✅ NEW: Get passenger info for driver (commented out - use fetchRideDetails instead)
+  // const fetchPassengerInfo = async () => {
+  //   try {
+  //     const token = localStorage.getItem("token");
+  //     
+  //     // Try to get passenger from chat history first
+  //     const chatResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/chat/passenger/${rideId}`, {
+  //       headers: getAuthHeaders(),
+  //     });
+  //     
+  //     if (chatResponse.ok) {
+  //       const chatData = await chatResponse.json();
+  //       if (chatData.success && chatData.passenger) {
+  //         setOtherUser({
             _id: chatData.passenger._id,
             name: chatData.passenger.name,
             email: chatData.passenger.email,
@@ -176,6 +175,7 @@ const RideChat = () => {
   // ✅ Socket connection for 1-on-1 chat
   useEffect(() => {
     if (currentUser && rideId && rideDetails) {
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       console.log("Setting up 1-on-1 chat for user:", currentUser._id);
       
       socket.emit("register-user", currentUser._id);
